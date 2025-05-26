@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Conversion Tool</title>
+    <base target="_self">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@preline/preline@2.0.0/dist/preline.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .tool-card {
+            transition: all 0.3s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dropzone {
+            border: 2px dashed #9CA3AF;
+            transition: all 0.3s ease;
+        }
+        .dropzone.active {
+            border-color: #3B82F6;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">File Conversion Tool</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Convert between different file formats easily</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- JPG to PDF Card -->
+            <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg mr-4">
+                            <i class="fas fa-file-pdf text-blue-600 dark:text-blue-300 text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">JPG to PDF</h2>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">Convert your JPG images to PDF documents</p>
+                    
+                    <div id="jpg-dropzone" class="dropzone rounded-lg p-8 mb-4 text-center cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500 dark:text-gray-400">Drag & drop JPG files here or click to browse</p>
+                        <input type="file" id="jpg-input" accept="image/jpeg" class="hidden" multiple>
+                    </div>
+                    
+                    <div id="jpg-preview" class="hidden mb-4 grid grid-cols-2 gap-2"></div>
+                    
+                    <button id="convert-jpg-to-pdf" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-file-export mr-2"></i> Convert to PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- URL to JPG Card -->
+            <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 dark:bg-green-900 p-3 rounded-lg mr-4">
+                            <i class="fas fa-image text-green-600 dark:text-green-300 text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">URL to JPG</h2>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">Convert any webpage URL to JPG image</p>
+                    
+                    <div class="mb-4">
+                        <input type="url" id="url-jpg-input" placeholder="Enter website URL (e.g., https://example.com)" class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <label class="text-gray-600 dark:text-gray-300 mr-2">Quality:</label>
+                        <input type="range" id="jpg-quality" min="0.1" max="1" step="0.1" value="0.8" class="w-full">
+                        <span id="jpg-quality-value" class="ml-2 text-gray-600 dark:text-gray-300">80%</span>
+                    </div>
+                    
+                    <button id="convert-url-to-jpg" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-4 rounded-lg transition duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-download mr-2"></i> Download JPG
+                    </button>
+                </div>
+            </div>
+
+            <!-- URL to PNG Card -->
+            <div class="tool-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg mr-4">
+                            <i class="fas fa-file-image text-purple-600 dark:text-purple-300 text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">URL to PNG</h2>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">Convert any webpage URL to PNG image</p>
+                    
+                    <div class="mb-4">
+                        <input type="url" id="url-png-input" placeholder="Enter website URL (e.g., https://example.com)" class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <label class="text-gray-600 dark:text-gray-300 mr-2">Quality:</label>
+                        <input type="range" id="png-quality" min="0.1" max="1" step="0.1" value="0.8" class="w-full">
+                        <span id="png-quality-value" class="ml-2 text-gray-600 dark:text-gray-300">80%</span>
+                    </div>
+                    
+                    <button id="convert-url-to-png" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 px-4 rounded-lg transition duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-download mr-2"></i> Download PNG
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 text-center text-gray-500 dark:text-gray-400">
+            <p>All conversions happen in your browser - no files are uploaded to any server</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+
+        // JPG to PDF functionality
+        const jpgDropzone = document.getElementById('jpg-dropzone');
+        const jpgInput = document.getElementById('jpg-input');
+        const jpgPreview = document.getElementById('jpg-preview');
+        const convertJpgToPdfBtn = document.getElementById('convert-jpg-to-pdf');
+        let jpgFiles = [];
+
+        // Handle drag and drop for JPG files
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            jpgDropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            jpgDropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            jpgDropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            jpgDropzone.classList.add('active');
+        }
+
+        function unhighlight() {
+            jpgDropzone.classList.remove('active');
+        }
+
+        jpgDropzone.addEventListener('drop', handleDrop, false);
+        jpgDropzone.addEventListener('click', () => jpgInput.click());
+
+        jpgInput.addEventListener('change', function(e) {
+            handleFiles(e.target.files);
+        });
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            jpgFiles = [];
+            jpgPreview.innerHTML = '';
+            jpgPreview.classList.add('hidden');
+            
+            const validFiles = Array.from(files).filter(file => file.type === 'image/jpeg');
+            
+            if (validFiles.length === 0) {
+                alert('Please upload only JPG files.');
+                return;
+            }
+            
+            jpgFiles = validFiles;
+            
+            if (jpgFiles.length > 0) {
+                jpgPreview.classList.remove('hidden');
+                jpgFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.className = 'relative';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'w-full h-auto rounded-lg';
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        removeBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs';
+                        removeBtn.onclick = () => removeImage(index);
+                        
+                        imgContainer.appendChild(img);
+                        imgContainer.appendChild(removeBtn);
+                        jpgPreview.appendChild(imgContainer);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            updateConvertButton();
+        }
+
+        function removeImage(index) {
+            jpgFiles.splice(index, 1);
+            jpgPreview.innerHTML = '';
+            
+            if (jpgFiles.length > 0) {
+                jpgFiles.forEach((file, newIndex) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.className = 'relative';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'w-full h-auto rounded-lg';
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        removeBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs';
+                        removeBtn.onclick = () => removeImage(newIndex);
+                        
+                        imgContainer.appendChild(img);
+                        imgContainer.appendChild(removeBtn);
+                        jpgPreview.appendChild(imgContainer);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                jpgPreview.classList.add('hidden');
+            }
+            
+            updateConvertButton();
+        }
+
+        function updateConvertButton() {
+            convertJpgToPdfBtn.disabled = jpgFiles.length === 0;
+        }
+
+        convertJpgToPdfBtn.addEventListener('click', convertJpgToPdf);
+
+        function convertJpgToPdf() {
+            if (jpgFiles.length === 0) return;
+            
+            convertJpgToPdfBtn.disabled = true;
+            convertJpgToPdfBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Converting...';
+            
+            const pdf = new jsPDF();
+            let processedCount = 0;
+            
+            jpgFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const imgWidth = img.width;
+                        const imgHeight = img.height;
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+                        
+                        if (index > 0) {
+                            pdf.addPage();
+                        }
+                        
+                        pdf.addImage(img, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                        
+                        processedCount++;
+                        
+                        if (processedCount === jpgFiles.length) {
+                            pdf.save('converted_images.pdf');
+                            convertJpgToPdfBtn.disabled = false;
+                            convertJpgToPdfBtn.innerHTML = '<i class="fas fa-file-export mr-2"></i> Convert to PDF';
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // URL to JPG functionality
+        const urlJpgInput = document.getElementById('url-jpg-input');
+        const jpgQuality = document.getElementById('jpg-quality');
+        const jpgQualityValue = document.getElementById('jpg-quality-value');
+        const convertUrlToJpgBtn = document.getElementById('convert-url-to-jpg');
+
+        jpgQuality.addEventListener('input', function() {
+            jpgQualityValue.textContent = `${Math.round(this.value * 100)}%`;
+        });
+
+        convertUrlToJpgBtn.addEventListener('click', convertUrlToJpg);
+
+        function convertUrlToJpg() {
+            const url = urlJpgInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+            
+            convertUrlToJpgBtn.disabled = true;
+            convertUrlToJpgBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Processing...';
+            
+            // Create an iframe to load the URL
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.left = '-9999px';
+            iframe.style.top = '-9999px';
+            iframe.style.width = '1920px';
+            iframe.style.height = '1080px';
+            iframe.style.border = 'none';
+            iframe.src = url;
+            
+            document.body.appendChild(iframe);
+            
+            iframe.onload = function() {
+                setTimeout(() => {
+                    html2canvas(iframe, {
+                        scale: parseFloat(jpgQuality.value),
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true
+                    }).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = 'screenshot.jpg';
+                        link.href = canvas.toDataURL('image/jpeg');
+                        link.click();
+                        
+                        document.body.removeChild(iframe);
+                        convertUrlToJpgBtn.disabled = false;
+                        convertUrlToJpgBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download JPG';
+                    }).catch(err => {
+                        console.error('Error capturing screenshot:', err);
+                        alert('Error capturing screenshot. Please try a different URL or check CORS policies.');
+                        document.body.removeChild(iframe);
+                        convertUrlToJpgBtn.disabled = false;
+                        convertUrlToJpgBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download JPG';
+                    });
+                }, 2000); // Wait for 2 seconds to ensure page loads
+            };
+        }
+
+        // URL to PNG functionality
+        const urlPngInput = document.getElementById('url-png-input');
+        const pngQuality = document.getElementById('png-quality');
+        const pngQualityValue = document.getElementById('png-quality-value');
+        const convertUrlToPngBtn = document.getElementById('convert-url-to-png');
+
+        pngQuality.addEventListener('input', function() {
+            pngQualityValue.textContent = `${Math.round(this.value * 100)}%`;
+        });
+
+        convertUrlToPngBtn.addEventListener('click', convertUrlToPng);
+
+        function convertUrlToPng() {
+            const url = urlPngInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+            
+            convertUrlToPngBtn.disabled = true;
+            convertUrlToPngBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Processing...';
+            
+            // Create an iframe to load the URL
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.left = '-9999px';
+            iframe.style.top = '-9999px';
+            iframe.style.width = '1920px';
+            iframe.style.height = '1080px';
+            iframe.style.border = 'none';
+            iframe.src = url;
+            
+            document.body.appendChild(iframe);
+            
+            iframe.onload = function() {
+                setTimeout(() => {
+                    html2canvas(iframe, {
+                        scale: parseFloat(pngQuality.value),
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true
+                    }).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = 'screenshot.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        
+                        document.body.removeChild(iframe);
+                        convertUrlToPngBtn.disabled = false;
+                        convertUrlToPngBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download PNG';
+                    }).catch(err => {
+                        console.error('Error capturing screenshot:', err);
+                        alert('Error capturing screenshot. Please try a different URL or check CORS policies.');
+                        document.body.removeChild(iframe);
+                        convertUrlToPngBtn.disabled = false;
+                        convertUrlToPngBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download PNG';
+                    });
+                }, 2000); // Wait for 2 seconds to ensure page loads
+            };
+        }
+
+        // Handle all anchor tags with JavaScript
+        document.querySelectorAll('a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (this.href) {
+                    window.location.href = this.href;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
